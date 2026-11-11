@@ -1,0 +1,32 @@
+name: Bug report
+description: Report a reproducible defect
+labels: ["bug"]
+body:
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run ...
+        2. Type ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior / log
+      description: Never paste secrets or credentials.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: OS / compiler / commit
+      placeholder: Arch Linux / gcc 16 / 123abcd
