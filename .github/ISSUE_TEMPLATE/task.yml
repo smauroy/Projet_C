@@ -1,0 +1,19 @@
+name: Engineering task
+description: Refactoring, testing, docs, build and maintenance
+labels: ["chore"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Done when
+      placeholder: |
+        - [ ] Build succeeds
+        - [ ] Changes documented
+    validations:
+      required: true

@@ -1,0 +1,43 @@
+name: CI - C11 Build and Tests
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'release/**'
+      - 'hotfix/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: build-test (${{ matrix.compiler }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install C toolchain
+        run: sudo apt-get update && sudo apt-get install -y build-essential clang make
+
+      - name: Build
+        run: make clean && make CC=${{ matrix.compiler }}
+
+      - name: Test
+        run: make CC=${{ matrix.compiler }} test
