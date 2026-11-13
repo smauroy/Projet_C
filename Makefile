@@ -17,8 +17,17 @@ GTK_CFLAGS = $(shell pkg-config --cflags gtk4)
 # Récupère les bibliothèques nécessaires pour GTK4.
 GTK_LIBS = $(shell pkg-config --libs gtk4)
 
+# Détecte le système d'exploitation.
+# Sous Windows, l'exécutable possède l'extension .exe.
+# Sous Linux, aucune extension n'est nécessaire.
+ifeq ($(OS),Windows_NT)
+    EXT = .exe
+else
+    EXT =
+endif
+
 # Définit le chemin et le nom du programme exécutable.
-TARGET = build/autotranslate
+TARGET = build/autotranslate$(EXT)
 
 # Définit le fichier source principal du programme.
 SRC = src/main.c
@@ -31,10 +40,7 @@ all: $(TARGET)
 
 # Construit l'exécutable à partir du fichier source.
 $(TARGET): $(SRC)
-	# Crée le dossier build s'il n'existe pas.
 	@mkdir -p build
-
-	# Compile le code C et lie les bibliothèques GTK4.
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) $(SRC) -o $@ $(GTK_LIBS)
 
 # Compile puis lance le programme.
@@ -47,7 +53,6 @@ check:
 
 # Effectue la vérification syntaxique du programme.
 test: check
-	# Indique que la vérification a réussi.
 	@echo "Vérification syntaxique réussie. Tests unitaires non encore implémentés."
 
 # Supprime les fichiers générés lors de la compilation.
