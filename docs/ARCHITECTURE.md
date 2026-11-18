@@ -1,21 +1,21 @@
-# AutoTranslate editor architecture
+# Architecture de l'éditeur AutoTranslate
 
-`src/main.c` initializes `GtkApplication`, creates the application window, and
-sets its child to the reusable editor component in `src/ui/`.
+`src/main.c` démarre `GtkApplication`, crée la fenêtre et y place l'éditeur
+réutilisable de `src/ui/`.
 
-`editor.c` owns the GTK layout and connects the editable source
-`GtkTextBuffer`'s `changed` signal. Each edit reads the current full UTF-8 text,
-asks the GTK independent parser for completed sentences, and refreshes the
-read-only preview buffer and completed sentence count. It never writes to the
-source buffer. The preview currently labels results as pending; it does not
-call a translation service.
+`editor.c` construit l'écran et écoute le signal `changed` du `GtkTextBuffer`
+source. Ce signal est envoyé chaque fois que le texte change. Le programme lit
+alors le texte UTF-8 complet, demande au découpeur les phrases terminées, puis
+met à jour l'aperçu en lecture seule et le compteur. Il ne touche jamais au
+texte source. L'aperçu affiche un message d'attente ; aucun service de
+traduction n'est appelé.
 
-`sentence_parser.c` uses GLib UTF-8 helpers and has no GTK widget dependency.
-It returns completed sentences ending in a period and ignores periods between
-two ASCII digits, so values such as `3.14` remain within one sentence. Parser
-tests run without opening a window through `make test`.
+`sentence_parser.c` utilise les outils UTF-8 de GLib et ne dépend pas des
+widgets GTK. Il renvoie les phrases finies par un point et ignore le point
+entre deux chiffres (par exemple `3.14`). `make test` vérifie ce découpeur sans
+ouvrir de fenêtre.
 
-The MVP treats periods as sentence boundaries. Abbreviations can produce
-premature boundaries, and ellipses are ambiguous: their first period is
-currently treated as the boundary. Exclamation and question marks are not
-boundaries yet.
+Pour le moment, un point marque la fin d'une phrase. Une abréviation peut donc
+couper une phrase trop tôt. Les points de suspension sont ambigus : le premier
+est pris comme fin de phrase. Les points d'interrogation et d'exclamation ne
+sont pas encore reconnus.

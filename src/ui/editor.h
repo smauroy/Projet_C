@@ -3,7 +3,7 @@
 
 #include <gtk/gtk.h>
 
-/* Creates the complete editor UI. The returned widget is owned by its parent. */
+/* Crée l'interface. Le widget retourné sera libéré avec son parent GTK. */
 GtkWidget *editor_new(void);
 
 #endif

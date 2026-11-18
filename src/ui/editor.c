@@ -1,7 +1,5 @@
 #include "editor.h"
 
-#include <glib/gi18n.h>
-
 #include "../core/sentence_parser.h"
 
 typedef struct {
@@ -16,10 +14,12 @@ on_source_changed(GtkTextBuffer *buffer, gpointer user_data)
     if (state == NULL || state->preview == NULL || state->status == NULL)
         return;
 
+    /* Lit tout le texte sans modifier le document que l'utilisateur écrit. */
     GtkTextIter start;
     GtkTextIter end;
     gtk_text_buffer_get_bounds(buffer, &start, &end);
     gchar *source_text = gtk_text_buffer_get_text(buffer, &start, &end, TRUE);
+    /* Le découpage est séparé de GTK et peut donc être testé seul. */
     GPtrArray *sentences = sentence_parser_extract_completed(source_text);
     GString *preview_text = g_string_new(NULL);
 
@@ -27,6 +27,7 @@ on_source_changed(GtkTextBuffer *buffer, gpointer user_data)
         const gchar *sentence = g_ptr_array_index(sentences, i);
         if (preview_text->len > 0)
             g_string_append(preview_text, "\n\n");
+        /* Ce texte indique qu'une traduction reste à faire. */
         g_string_append_printf(preview_text,
             "Original:\n%s\n\nTraduction:\n[Traduction en attente]", sentence);
     }
@@ -49,6 +50,7 @@ on_source_changed(GtkTextBuffer *buffer, gpointer user_data)
 static GtkWidget *
 create_text_area(gboolean editable, const gchar *placeholder)
 {
+    /* Une seule fonction configure les deux zones de texte de l'écran. */
     GtkWidget *view = gtk_text_view_new();
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(view), GTK_WRAP_WORD_CHAR);
     gtk_text_view_set_editable(GTK_TEXT_VIEW(view), editable);
@@ -78,6 +80,7 @@ create_scrolled_text(GtkWidget *view)
 GtkWidget *
 editor_new(void)
 {
+    /* La fenêtre principale reçoit cette boîte comme interface complète. */
     GtkWidget *root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
     gtk_widget_set_margin_top(root, 20);
     gtk_widget_set_margin_bottom(root, 16);
@@ -119,6 +122,7 @@ editor_new(void)
     gtk_widget_set_halign(status_label, GTK_ALIGN_END);
     gtk_box_append(GTK_BOX(root), status_label);
 
+    /* L'état reste valide aussi longtemps que la boîte existe. */
     EditorState *state = g_new0(EditorState, 1);
     state->preview = GTK_TEXT_VIEW(preview_view);
     state->status = GTK_LABEL(status_label);

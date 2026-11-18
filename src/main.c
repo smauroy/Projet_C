@@ -7,7 +7,7 @@
 static void
 activate(GtkApplication *app, gpointer user_data)
 {
-    (void)user_data; /* Paramètre requis par le signal GTK, inutilisé ici. */
+    (void)user_data; /* GTK transmet ce paramètre, mais nous n'en avons pas besoin. */
 
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "AutoTranslate");

@@ -3,6 +3,7 @@
 static gchar *
 trim_sentence(const gchar *start, const gchar *end)
 {
+    /* Retire les espaces aux bords sans découper au milieu d'un caractère UTF-8. */
     while (start < end) {
         gunichar ch = g_utf8_get_char(start);
         if (!g_unichar_isspace(ch))
@@ -27,12 +28,14 @@ sentence_parser_extract_completed(const gchar *text)
     if (text == NULL || !g_utf8_validate(text, -1, NULL) || *text == '\0')
         return sentences;
 
+    /* Les pointeurs avancent par caractères UTF-8 ; le point reste ASCII. */
     const gchar *sentence_start = text;
     const gchar *cursor = text;
     while (*cursor != '\0') {
         if (*cursor == '.') {
             gboolean decimal_point = cursor > text && cursor[1] != '\0' &&
                 g_ascii_isdigit(cursor[-1]) && g_ascii_isdigit(cursor[1]);
+            /* Un point entouré de chiffres est un décimal, comme dans 3.14. */
             if (!decimal_point) {
                 gchar *sentence = trim_sentence(sentence_start, cursor + 1);
                 if (*sentence != '\0')

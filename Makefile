@@ -56,7 +56,7 @@ check:
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -Isrc -fsyntax-only $(APP_SOURCES)
 	$(CC) $(CFLAGS) $(GLIB_CFLAGS) -Isrc -fsyntax-only src/core/sentence_parser.c tests/sentence_parser_test.c
 
-# Compile and run parser tests without opening a graphical window.
+# Compile les tests du découpeur et les lance sans ouvrir de fenêtre.
 $(PARSER_TEST): src/core/sentence_parser.c src/core/sentence_parser.h tests/sentence_parser_test.c
 	@mkdir -p build
 	$(CC) $(CFLAGS) $(GLIB_CFLAGS) -Isrc src/core/sentence_parser.c tests/sentence_parser_test.c -o $@ $(GLIB_LIBS)
