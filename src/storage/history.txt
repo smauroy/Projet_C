@@ -1,0 +1,5 @@
+Original : test 1 
+Traduction : Traduction en cours...
+Langue source : Français
+Langue cible : Vietnamien
+

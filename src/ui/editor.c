@@ -1,10 +1,12 @@
 #include "editor.h"
 
 #include "../core/sentence_parser.h"
+#include "../storage/save.h"
 
 /* Structure regroupant les widgets nécessaires au fonctionnement de l'éditeur */
 typedef struct {
     GtkTextView *preview;
+    GtkTextView *input;
     GtkLabel *status;
     GtkDropDown *source, *target;
 } EditorState;
@@ -134,21 +136,50 @@ on_languages_changed(GObject *objet, GParamSpec *pspec, gpointer user_data) {
 }
 
 /* Fonction appelée lors du clic sur le bouton Traduire */
-static void 
+static void
 clicked_and_translate(GtkButton *button, gpointer user_data)
 {
     (void)button;
 
+    /* Récupère l'état de l'éditeur pour l'identification du sens de la traduction */
+    EditorState *state = user_data;
+
     /* Récupère la zone de saisie */
-    GtkTextView *source_view = GTK_TEXT_VIEW(user_data);
+    GtkTextView *source_view = state->input;
+
     /* Récupère le buffer contenant le texte saisi par l'utilisateur */
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(source_view);
-    /* Extrait le texte original à l'aide de la fonction commune */
-    gchar *trad_text = get_source_text(buffer);
 
-    /* Affiche le texte récupéré et libère la mémoire allouée */
-    g_print("Traduire :\n%s\n", trad_text);
-    g_free(trad_text);
+    /* Récupère le texte original grâce au buffer */
+    gchar *original = get_source_text(buffer);
+
+    /* Traduction provisoire */
+    const char *translated = "Traduction en cours...";
+
+    /* Récupère l'index des langues sélectionnées */
+    guint source_index = gtk_drop_down_get_selected(state->source);
+    guint target_index = gtk_drop_down_get_selected(state->target);
+
+    /* Établit la correspondance entre l'index et la langue */
+    const char *languages[] = {
+        "Français",
+        "Vietnamien"
+    };
+
+    /* Retranscrit le sens de la traduction */
+    const char *source_language = languages[source_index];
+    const char *target_language = languages[target_index];
+
+    /* Enregistre les informations lorsqu'on clique sur le bouton de Traduction */
+    int save_action = save_translation(original, translated, source_language, target_language);
+
+    if (save_action == 0)
+        g_print("Traduction sauvegardée !\n");
+    else
+        g_print("Erreur de sauvegarde.\n");
+
+    /* Libération de la mémoire */
+    g_free(original);
 }
 
 /* Crée et initialise l'ensemble de l'interface graphique de l'application */
@@ -205,8 +236,6 @@ editor_new(void)
     GtkWidget *button = gtk_button_new_with_label("Traduire");
     /* Intègre le bouton dans la fenêtre principale */
     gtk_box_append(GTK_BOX(root), button);
-    /* Connecte le clic sur le bouton à la fonction de traduction et transmet le texte de la zone de saisie*/
-    g_signal_connect(button,"clicked",G_CALLBACK(clicked_and_translate),source_view);
 
     /* Crée et ajoute le titre de la zone d'aperçu */
     GtkWidget *preview_label = gtk_label_new("Aperçu des phrases terminées");
@@ -227,6 +256,7 @@ editor_new(void)
     EditorState *state = g_new0(EditorState, 1);
     /* Associe à la structure les widgets nécessaires à la mise à jour de l'aperçu */
     state->preview = GTK_TEXT_VIEW(preview_view);
+    state->input = GTK_TEXT_VIEW(source_view);
     state->status = GTK_LABEL(status_label);
     state->source = GTK_DROP_DOWN(source);
     state->target = GTK_DROP_DOWN(target);
@@ -237,6 +267,9 @@ editor_new(void)
     /* Connecte les modifications du texte au callback chargé de mettre à jour l'aperçu */
     g_signal_connect(gtk_text_view_get_buffer(GTK_TEXT_VIEW(source_view)),
         "changed", G_CALLBACK(on_source_changed), state);
+
+    /* Connecte le clic sur le bouton à la fonction de traduction et transmet le texte de la zone de saisie*/
+    g_signal_connect(button,"clicked",G_CALLBACK(clicked_and_translate),state);
 
     return root;
 }
